@@ -20,7 +20,7 @@ jobs:
           node-version: 10
 
       - name: Cashe node modules
-        uses: action/cache@v3
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**package-lock.json')}}
@@ -46,7 +46,7 @@ jobs:
           node-version: 10
       
       - name: Cashe node modules
-        uses: action/cache@v3
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**package-lock.json') }}
