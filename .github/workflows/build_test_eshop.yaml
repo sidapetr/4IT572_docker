@@ -93,7 +93,7 @@ jobs:
           npm run test -- --colors     
 
   Deploy:
-    needs: Build, Test
+    needs: [Build, Test]
     runs-on: Ubuntu-latest
     if: ${{ github.ref == 'refs/heads/master' }}
 
