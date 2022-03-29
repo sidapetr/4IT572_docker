@@ -1,4 +1,4 @@
-name: 'Build and test our eshop'
+name: 'Build and test our Eshop'
 
 on:
   workflow_dispatch:
@@ -19,17 +19,16 @@ jobs:
         with:
           node-version: 10
 
-      - name: Cashe node modules
+      - name: Cache node modules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ hashFiles('**package-lock.json')}}
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: node_modules-
 
       - name: Install packages with npm
         run: |
           npm ci
-          
   Build:
     needs: Install
     runs-on: ubuntu-latest
@@ -44,23 +43,22 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 10
-      
-      - name: Cashe node modules
+
+      - name: Cache node modules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ hashFiles('**package-lock.json') }}
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Build
         run: |
           npm rebuild node-sass --force
           npm run build -- --colors
-
       - name: Cache node modules and build folder
-        if: ${{ github.ref == "refs/heads/master" }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: actions/cache@v3
         with:
-          path:
+          path: |
             ~/.npm
             ./node_modules
             ./build
@@ -81,21 +79,20 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 10
-      
-      - name: Cashe node modules
+
+      - name: Cache node modules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ hashFiles('**package-lock.json') }}
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Run Tests
         run: |
-          npm run test -- --colors     
-
+          npm run test -- --colors
   Deploy:
-    needs: Build, Test
-    runs-on: Ubuntu-latest
-    if: ${{ github.ref == "refs/heads/master" }}
+    needs: [Build, Test]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
 
     steps:
       - name: Git Checkout
@@ -106,11 +103,14 @@ jobs:
       - name: Load node modules and build folder
         uses: actions/cache@v3
         with:
-          path:
+          path: |
             ~/.npm
             ./node_modules
             ./build
           key: ${{ runner.os }}-build-${{ github.run_id }}
 
-      - name: Deploy to firebase
-        run: ./node_modules/.bin/firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Deploy function
+        uses: lowply/deploy-firebase@v0.0.5
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_PROJECT: sida-devops
